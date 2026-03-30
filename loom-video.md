@@ -8,8 +8,8 @@
 ## Video Contents
 
 1. **Introduction** (~7 sec) - Overview of the technical submission for the AI Automation Specialist role.
-2. **Tech Stack Overview** (~45 sec) — n8n, Supabase, OpenAI, Lovable
-3. **Why These Tools** (~50 sec) — rationale for each choice
-3. **Live Demo** (~4 min) — testing all query paths
-4. **Identity Unification** (~3 min) — flowchart walkthrough
-5. **What I'd Improve** (~30 sec) — future enhancements
+2. **Tech Stack Overview** (~45 sec) - n8n, Supabase, OpenAI, Lovable
+3. **Why These Tools** (~50 sec) - rationale for each choice
+3. **Live Demo** (~4 min) - testing all query paths
+4. **Identity Unification** (~3 min) - flowchart walkthrough
+5. **What I'd Improve** (~30 sec) - future enhancements
