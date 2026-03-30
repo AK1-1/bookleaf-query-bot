@@ -170,13 +170,13 @@ bookleaf-query-bot/
 
 ## Live Links
 
-🌐 **Chat UI (Lovable):** (https://preview--bookleaf-companion.lovable.app/)
+🌐 **Chat UI (Lovable):** https://preview--bookleaf-companion.lovable.app/
 
-📊 **Identity Unification Flowchart (Figma):** (https://www.figma.com/board/KVjupvdLLVEoZR0lFeO9xP/BookLeaf-Identity-Unification-Logic?node-id=0-1&t=nwAzGEERZTu7opm8-1)
+📊 **Identity Unification Flowchart (Figma):** https://www.figma.com/board/KVjupvdLLVEoZR0lFeO9xP/BookLeaf-Identity-Unification-Logic?node-id=0-1&t=nwAzGEERZTu7opm8-1
 
 ## Loom Video
 
-🎥 [Watch the walkthrough here] (https://www.tella.tv/video/ai-automation-system-demo-n8n-supabase-openai-267i)
+🎥 [Watch the walkthrough here] https://www.tella.tv/video/ai-automation-system-demo-n8n-supabase-openai-267i
 
 ---
 
