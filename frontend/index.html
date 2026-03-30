@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookLeaf Author Support</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f0f2f5; height: 100vh; display: flex; justify-content: center; align-items: center; }
+
+  .chat-container {
+    width: 420px; height: 680px; background: #fff; border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  .chat-header {
+    background: linear-gradient(135deg, #e84c5e, #c43e4e); color: #fff; padding: 20px 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .chat-header .avatar {
+    width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .chat-header .info h3 { font-size: 16px; font-weight: 600; }
+  .chat-header .info p { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px;
+    background: #f7f8fa;
+  }
+
+  .message {
+    max-width: 82%; padding: 12px 16px; border-radius: 16px; font-size: 14px;
+    line-height: 1.5; animation: fadeIn 0.3s ease;
+  }
+  .message.bot {
+    background: #fff; color: #1a1a1a; align-self: flex-start;
+    border: 1px solid #e8e8e8; border-bottom-left-radius: 4px;
+  }
+  .message.user {
+    background: #e84c5e; color: #fff; align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .message.escalated {
+    background: #fff3cd; color: #856404; border: 1px solid #ffc107;
+    align-self: flex-start; border-bottom-left-radius: 4px;
+  }
+  .message.error {
+    background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+    align-self: flex-start; border-bottom-left-radius: 4px;
+  }
+
+  .typing {
+    align-self: flex-start; background: #fff; border: 1px solid #e8e8e8;
+    padding: 12px 20px; border-radius: 16px; border-bottom-left-radius: 4px;
+    display: none;
+  }
+  .typing span {
+    display: inline-block; width: 8px; height: 8px; background: #ccc; border-radius: 50%;
+    animation: bounce 1.2s infinite; margin: 0 2px;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  .chat-input {
+    padding: 16px 20px; background: #fff; border-top: 1px solid #e8e8e8;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .chat-input input {
+    flex: 1; border: 1px solid #ddd; border-radius: 24px; padding: 10px 18px;
+    font-size: 14px; outline: none; transition: border 0.2s;
+  }
+  .chat-input input:focus { border-color: #e84c5e; }
+  .chat-input button {
+    width: 40px; height: 40px; background: #e84c5e; color: #fff; border: none;
+    border-radius: 50%; cursor: pointer; font-size: 16px; transition: background 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-input button:hover { background: #c43e4e; }
+  .chat-input button:disabled { background: #ccc; cursor: not-allowed; }
+
+  .meta-tag {
+    font-size: 11px; color: #999; margin-top: 4px; display: block;
+  }
+  .confidence-badge {
+    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    margin-top: 6px; font-weight: 500;
+  }
+  .confidence-high { background: #d4edda; color: #155724; }
+  .confidence-low { background: #fff3cd; color: #856404; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="avatar">📚</div>
+    <div class="info">
+      <h3>BookLeaf Author Support</h3>
+      <p>AI-powered query assistant</p>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <div class="message bot">
+      Hi! 👋 I'm BookLeaf's author support assistant. I can help you with publishing timelines, royalty reports, dashboard access, add-on status, and more.
+      <span class="meta-tag">Please share your registered email to get started.</span>
+    </div>
+  </div>
+
+  <div class="typing" id="typingIndicator">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Type your question..." autofocus>
+    <button id="sendBtn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+  // =============================================
+  // CONFIGURATION — UPDATE THESE
+  // =============================================
+  const N8N_WEBHOOK_URL = 'YOUR_N8N_WEBHOOK_URL_HERE'; 
+  // e.g., 'https://n8n.agenticalai.com/webhook/bookleaf-query'
+
+  let authorEmail = null;
+  let conversationHistory = [];
+
+  const chatMessages = document.getElementById('chatMessages');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const typingIndicator = document.getElementById('typingIndicator');
+
+  userInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && userInput.value.trim()) sendMessage();
+  });
+
+  function addMessage(text, type = 'bot', extras = {}) {
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    
+    let html = text;
+    
+    if (extras.confidence !== undefined) {
+      const level = extras.confidence >= 80 ? 'high' : 'low';
+      const label = extras.confidence >= 80 ? '✓ Confident' : '⚠ Low confidence';
+      html += `<span class="confidence-badge confidence-${level}">${label} (${extras.confidence}%)</span>`;
+    }
+    if (extras.intent) {
+      html += `<span class="meta-tag">Intent: ${extras.intent}</span>`;
+    }
+    
+    div.innerHTML = html;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showTyping() {
+    typingIndicator.style.display = 'block';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function hideTyping() {
+    typingIndicator.style.display = 'none';
+  }
+
+  async function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    userInput.value = '';
+    sendBtn.disabled = true;
+    showTyping();
+
+    // Step 1: Capture email first
+    if (!authorEmail) {
+      const emailMatch = text.match(/[\w.-]+@[\w.-]+\.\w+/);
+      if (emailMatch) {
+        authorEmail = emailMatch[0];
+        hideTyping();
+        addMessage(`Thanks! I've found your account with <strong>${authorEmail}</strong>. How can I help you today?`);
+        sendBtn.disabled = false;
+        return;
+      } else {
+        hideTyping();
+        addMessage("I need your registered email to look up your account. Could you please share it?");
+        sendBtn.disabled = false;
+        return;
+      }
+    }
+
+    // Step 2: Send query to n8n webhook
+    try {
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: text,
+          email: authorEmail,
+          channel: 'web_chat',
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const data = await response.json();
+      hideTyping();
+
+      if (data.escalated) {
+        addMessage(data.response, 'escalated', { 
+          confidence: data.confidence,
+          intent: data.intent 
+        });
+      } else {
+        addMessage(data.response, 'bot', { 
+          confidence: data.confidence,
+          intent: data.intent 
+        });
+      }
+    } catch (error) {
+      hideTyping();
+      console.error('Error:', error);
+      
+      // =============================================
+      // DEMO MODE — Remove this block in production
+      // This simulates responses when webhook isn't connected
+      // =============================================
+      const demoResponse = getDemoResponse(text);
+      if (demoResponse) {
+        addMessage(demoResponse.response, demoResponse.escalated ? 'escalated' : 'bot', {
+          confidence: demoResponse.confidence,
+          intent: demoResponse.intent
+        });
+      } else {
+        addMessage("I'm having trouble connecting to our systems right now. Please try again in a moment, or email us at support@bookleafpub.com", 'error');
+      }
+    }
+
+    sendBtn.disabled = false;
+    userInput.focus();
+  }
+
+  // =============================================
+  // DEMO RESPONSES — For testing without webhook
+  // Remove in production
+  // =============================================
+  function getDemoResponse(query) {
+    const q = query.toLowerCase();
+    
+    if (q.includes('book live') || q.includes('publish') || q.includes('status')) {
+      return {
+        response: "Great news! Your book <strong>\"Whispers of the Wind\"</strong> went live on <strong>January 20, 2026</strong>. It's now available on Amazon, Flipkart, and the BookLeaf website. 🎉",
+        confidence: 95, intent: 'book_status', escalated: false
+      };
+    }
+    if (q.includes('royalty') || q.includes('earning') || q.includes('payment')) {
+      return {
+        response: "Your royalty status for <strong>\"Whispers of the Wind\"</strong> is currently <strong>Processed</strong>. The payment will be disbursed within 15 business days. You can check the detailed breakdown in your author dashboard.",
+        confidence: 92, intent: 'royalty_inquiry', escalated: false
+      };
+    }
+    if (q.includes('dashboard') || q.includes('login') || q.includes('access')) {
+      return {
+        response: "Your dashboard access is <strong>active</strong>. You can log in at <strong>dashboard.bookleafpub.com</strong> using your registered email. If you're having trouble, try the \"Forgot Password\" option.",
+        confidence: 90, intent: 'dashboard_access', escalated: false
+      };
+    }
+    if (q.includes('author copy') || q.includes('copy') || q.includes('shipping')) {
+      return {
+        response: "Your author copies for <strong>\"Whispers of the Wind\"</strong> have been <strong>delivered</strong>. If you haven't received them, please check with your local courier or let us know.",
+        confidence: 88, intent: 'author_copy', escalated: false
+      };
+    }
+    if (q.includes('bestseller') || q.includes('pr') || q.includes('award') || q.includes('add-on') || q.includes('package')) {
+      return {
+        response: "Here's your add-on status for <strong>\"Whispers of the Wind\"</strong>:<br>📦 Bestseller Package: <strong>Active</strong><br>📰 PR Campaign: <strong>Completed</strong><br>🏆 Award Submission: <strong>Pending</strong>",
+        confidence: 91, intent: 'addon_status', escalated: false
+      };
+    }
+    // Low confidence — escalate
+    return {
+      response: "I want to make sure you get the right answer. Let me connect you with our author support team. A team member will get back to you within 2 hours. 🙏",
+      confidence: 55, intent: 'general_inquiry', escalated: true
+    };
+  }
+</script>
+</body>
+</html>

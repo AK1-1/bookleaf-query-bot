@@ -1,0 +1,1323 @@
+{
+  "name": "BookLeaf - Customer Query Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "db_lookup",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "route-db"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DB Lookup"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "route-rag",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "rag_search",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RAG Search"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "route-email",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "ask_email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ask Email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "route-escalate",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "escalate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Escalate"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ce0de955-202b-47f8-9af9-4a2ed5f13e2c",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "greeting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "greeting"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -3088,
+        2272
+      ],
+      "id": "641449f3-aa01-4098-9f70-2ebc353c3d7f",
+      "name": "Route Query"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "response",
+              "value": "I'd need your registered email to look up that information. Could you share the email you used when registering with BookLeaf?",
+              "type": "string"
+            },
+            {
+              "id": "confidence",
+              "name": "confidence",
+              "value": "={{ $json.confidence }}",
+              "type": "number"
+            },
+            {
+              "id": "intent",
+              "name": "intent",
+              "value": "={{ $json.intent }}",
+              "type": "string"
+            },
+            {
+              "id": "escalated",
+              "name": "escalated",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "needs_email",
+              "name": "needs_email",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "query",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "channel",
+              "name": "channel",
+              "value": "={{ $json.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "error_type",
+              "name": "error_type",
+              "value": "needs_email",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0fad8746-5899-4208-b70b-6175168c13ea",
+      "name": "Ask for Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2528,
+        2752
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst classData = $('Parse Classification1').first().json;\n\nreturn [{\n  json: {\n    response: \"I couldn't find an account with that email address. Let me check our knowledge base for you instead.\",\n    confidence: classData.confidence,\n    intent: classData.intent,\n    escalated: false,\n    query: classData.query,\n    email: classData.email,\n    channel: classData.channel,\n    error_type: 'no_match'\n  }\n}];"
+      },
+      "id": "290723a3-7271-47ae-afb3-e39a5db22447",
+      "name": "No Match Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1744,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst classData = $('Parse Classification1').first().json;\n\nreturn [{\n  json: {\n    response: \"I found multiple accounts linked to your information. Could you please confirm your exact registered email address or the title of your book so I can pull up the right account?\",\n    confidence: classData.confidence,\n    intent: classData.intent,\n    escalated: false,\n    query: classData.query,\n    email: classData.email,\n    channel: classData.channel,\n    error_type: 'multiple_matches'\n  }\n}];"
+      },
+      "id": "4694ffae-8897-496a-8334-7766d7c5b500",
+      "name": "Multiple Match Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1744,
+        2000
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bookleaf-query",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "9706ffc2-ec2f-4ed6-ab6a-7fb426938f04",
+      "name": "Webhook - Receive Query1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -4000,
+        2320
+      ],
+      "webhookId": "bookleaf-query"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "query",
+              "name": "query",
+              "value": "={{ $json.body.query || $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "channel",
+              "name": "channel",
+              "value": "={{ $json.body.channel || 'web_chat' }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "value": "={{ $json.body.timestamp || $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0f323746-0906-4cac-a9a2-bb35f488970b",
+      "name": "Set Input Fields1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3776,
+        2320
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5.4-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a query classifier for BookLeaf Publishing, a self-publishing platform in India.\n\nClassify the author's query into ONE of these intents:\n- book_status (is my book live, when will it publish, submission status, timeline)\n- royalty_inquiry (royalty payment, royalty report, earnings, payout)\n- dashboard_access (login issues, dashboard access, can't access account, password)\n- addon_status (bestseller package, PR campaign, award submission, marketing add-ons)\n- book_sales (sales numbers, how many copies sold, sales report)\n- author_copy (author copy delivery, shipping status, physical copies)\n- general_inquiry (anything that doesn't fit above — general questions about policies, requirements, process, pricing, formats, etc.)\n- greeting (hello, hi, I have a query, general conversation starters, thank you, bye)\n\nIMPORTANT: If the question is about general publishing policies, requirements, processes, pricing, or how things work at BookLeaf — classify as general_inquiry. Only classify as account-specific intents (book_status, royalty_inquiry, etc.) if the author is asking about THEIR specific book or account.\n\nAlso extract any identifiers from the query: email addresses, book titles, or author names.\n\nRespond ONLY in this exact JSON format, nothing else:\n{\n  \"intent\": \"book_status\",\n  \"confidence\": 92,\n  \"extracted_email\": null,\n  \"extracted_book_title\": null,\n  \"extracted_author_name\": null\n}\n\nConfidence should be 0-100. If the query is vague or ambiguous, lower the confidence.",
+              "role": "system"
+            },
+            {
+              "content": "=Author email: {{ $('Set Input Fields1').first().json.email }}\nAuthor query: {{ $('Set Input Fields1').first().json.query }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 200
+        }
+      },
+      "id": "f359b1b2-6219-4e82-808f-c61e234d9c2a",
+      "name": "OpenAI - Classify Intent1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        -3616,
+        2320
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "r6DgVlzLKWp2CCM2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0];\nconst prevData = $('Set Input Fields1').first().json;\n\nlet classification;\ntry {\n  let responseText = input.json.message?.content || input.json.text || JSON.stringify(input.json);\n  responseText = responseText.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  classification = JSON.parse(responseText);\n} catch (e) {\n  classification = {\n    intent: 'general_inquiry',\n    confidence: 50,\n    extracted_email: null,\n    extracted_book_title: null,\n    extracted_author_name: null\n  };\n}\n\nconst authorEmail = classification.extracted_email || prevData.email;\n\n// Determine routing\nconst dbRequiredIntents = ['book_status', 'royalty_inquiry', 'dashboard_access', 'addon_status', 'book_sales', 'author_copy'];\nconst greetingIntents = ['greeting'];\nconst needsDb = dbRequiredIntents.includes(classification.intent) && authorEmail;\nconst needsEmail = dbRequiredIntents.includes(classification.intent) && !authorEmail;\n\nlet route = 'rag_search';\nif (greetingIntents.includes(classification.intent)) route = 'greeting';\nelse if (needsEmail) route = 'ask_email';\nelse if (needsDb && classification.confidence >= 80) route = 'db_lookup';\nelse if (needsDb && classification.confidence < 80) route = 'escalate';\n\nreturn [{\n  json: {\n    query: prevData.query,\n    email: authorEmail || '',\n    channel: prevData.channel,\n    intent: classification.intent,\n    confidence: classification.confidence,\n    extracted_book_title: classification.extracted_book_title,\n    extracted_author_name: classification.extracted_author_name,\n    route: route\n  }\n}];"
+      },
+      "id": "57085d5b-e161-4af6-9b26-50fd14301a92",
+      "name": "Parse Classification1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3296,
+        2320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "authors",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $('Parse Classification1').first().json.email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -2816,
+        1744
+      ],
+      "id": "5daca474-4e7b-4051-af5f-17429c765f71",
+      "name": "Get many rows1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "cny8vgadQfLa5kx1",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst classificationData = $('Parse Classification1').first().json;\n\nconst validResults = items.filter(item => {\n  return item.json && \n         item.json.email && \n         item.json.email !== null && \n         item.json.email !== '' &&\n         Object.keys(item.json).length > 1;\n});\n\nconst resultCount = validResults.length;\n\nif (resultCount === 0) {\n  return [{\n    json: {\n      ...classificationData,\n      match_status: 'no_match',\n      author_data: null,\n      result_count: 0\n    }\n  }];\n} else if (resultCount === 1) {\n  return [{\n    json: {\n      ...classificationData,\n      match_status: 'single_match',\n      author_data: validResults[0].json,\n      result_count: 1\n    }\n  }];\n} else {\n  return [{\n    json: {\n      ...classificationData,\n      match_status: 'multiple_matches',\n      author_data: validResults[0].json,\n      result_count: resultCount\n    }\n  }];\n}"
+      },
+      "id": "9b652e70-3666-41ea-bf0d-c15f349378d7",
+      "name": "Check Match Results1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2512,
+        1728
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.match_status }}",
+                    "rightValue": "no_match",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "sw-nomatch"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "no_match"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "sw-single",
+                    "leftValue": "={{ $json.match_status }}",
+                    "rightValue": "single_match",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "single_match"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "sw-multi",
+                    "leftValue": "={{ $json.match_status }}",
+                    "rightValue": "multiple_matches",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "multiple_matches"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2288,
+        1776
+      ],
+      "id": "8f3f58f4-1f46-4e7b-85c0-a32edfa2c967",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5.4-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are BookLeaf Publishing's friendly and professional author support assistant.\n\nUse the following author data to answer their question accurately:\n\nAuthor: {{ $('Check Match Results1').first().json.author_data.author_name }}\nBook Title: {{ $('Check Match Results1').first().json.author_data.book_title }}\nFinal Submission Date: {{ $('Check Match Results1').first().json.author_data.final_submission_date || 'Not yet submitted' }}\nBook Live Date: {{ $('Check Match Results1').first().json.author_data.book_live_date || 'Not yet scheduled' }}\nRoyalty Status: {{ $('Check Match Results1').first().json.author_data.royalty_status || 'Not available' }}\nISBN: {{ $('Check Match Results1').first().json.author_data.isbn || 'Not assigned' }}\nAdd-on Services: {{ JSON.stringify($('Check Match Results1').first().json.author_data.add_on_services) }}\nDashboard Access: {{ $('Check Match Results1').first().json.author_data.dashboard_access ? 'Active' : 'Inactive' }}\nAuthor Copy Status: {{ $('Check Match Results1').first().json.author_data.author_copy_status || 'Not available' }}\n\nQuery Intent: {{ $('Check Match Results1').first().json.intent }}\n\nRules:\n- Be warm, professional, and concise\n- Only share information relevant to their specific question\n- If a date is null or empty, say \"not yet scheduled\" — never show \"null\"\n- Never fabricate information not present in the data\n- If unsure, say \"Let me connect you with our team for more details\"\n- Include specific dates, statuses, and ISBN when relevant\n- Use emojis sparingly for a friendly tone\n- Keep response under 100 words",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('Check Match Results1').first().json.query }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 300
+        }
+      },
+      "id": "0ed2fc8d-0654-40cd-af60-5000a9c06867",
+      "name": "OpenAI - Generate Response1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        -2000,
+        1792
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "r6DgVlzLKWp2CCM2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "response",
+              "value": "={{ $json.message?.content || $json.text || 'I apologize, but I could not generate a response. Please contact our support team at support@bookleafpub.com.' }}",
+              "type": "string"
+            },
+            {
+              "id": "confidence",
+              "name": "confidence",
+              "value": "={{ $('Parse Classification1').first().json.confidence }}",
+              "type": "number"
+            },
+            {
+              "id": "intent",
+              "name": "intent",
+              "value": "={{ $('Parse Classification1').first().json.intent }}",
+              "type": "string"
+            },
+            {
+              "id": "escalated",
+              "name": "escalated",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "query",
+              "name": "query",
+              "value": "={{ $('Parse Classification1').first().json.query }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $('Parse Classification1').first().json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "channel",
+              "name": "channel",
+              "value": "={{ $('Parse Classification1').first().json.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "error_type",
+              "name": "error_type",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "83aec086-4a4b-4cc0-873c-d908c8f0af81",
+      "name": "Format Success Response1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1664,
+        1792
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "response",
+              "value": "I want to make sure you get the right answer. Let me connect you with our author support team. A team member will get back to you within 2 hours. 🙏",
+              "type": "string"
+            },
+            {
+              "id": "confidence",
+              "name": "confidence",
+              "value": "={{ $json.confidence }}",
+              "type": "number"
+            },
+            {
+              "id": "intent",
+              "name": "intent",
+              "value": "={{ $json.intent }}",
+              "type": "string"
+            },
+            {
+              "id": "escalated",
+              "name": "escalated",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "query",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "channel",
+              "name": "channel",
+              "value": "={{ $json.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "error_type",
+              "name": "error_type",
+              "value": "low_confidence",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9cefe609-95df-4f76-b130-884eea37ec4f",
+      "name": "Escalation Response1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2528,
+        2544
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "response",
+              "value": "Our systems are temporarily updating. Please try again in a few minutes, or email us directly at support@bookleafpub.com. We apologize for the inconvenience. 🙏",
+              "type": "string"
+            },
+            {
+              "id": "confidence",
+              "name": "confidence",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "intent",
+              "name": "intent",
+              "value": "={{ $('Parse Classification1').first().json.intent }}",
+              "type": "string"
+            },
+            {
+              "id": "escalated",
+              "name": "escalated",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "query",
+              "name": "query",
+              "value": "={{ $('Parse Classification1').first().json.query }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $('Parse Classification1').first().json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "channel",
+              "name": "channel",
+              "value": "={{ $('Parse Classification1').first().json.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "error_type",
+              "name": "error_type",
+              "value": "db_down",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9238fff3-d097-4b89-b0e8-b1063506c758",
+      "name": "DB Error Response1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2256,
+        2112
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "tableName": {
+          "__rl": true,
+          "value": "knowledge_base",
+          "mode": "list",
+          "cachedResultName": "knowledge_base"
+        },
+        "prompt": "={{ $('Parse Classification1').first().json.query }}",
+        "topK": 8,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -2592,
+        2288
+      ],
+      "id": "933835e2-3c9e-46d7-944d-2253c51afb08",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "cny8vgadQfLa5kx1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2576,
+        2144
+      ],
+      "id": "ab4419bc-0f4d-44f6-be3a-4e6fbd201a96",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "r6DgVlzLKWp2CCM2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst classData = $('Parse Classification1').first().json;\n\nlet context = '';\n\nif (items.length > 0) {\n  const texts = items\n    .map(item => {\n      if (item.json.document?.pageContent) return item.json.document.pageContent;\n      if (item.json.pageContent) return item.json.pageContent;\n      if (item.json.content) return item.json.content;\n      return null;\n    })\n    .filter(t => t !== null && typeof t === 'string' && !t.match(/^[\\d.,\\-\\s]+$/));\n\n  context = texts.length > 0 \n    ? texts.join('\\n\\n') \n    : 'No relevant information found in knowledge base.';\n} else {\n  context = 'No relevant information found in knowledge base.';\n}\n\nreturn [{\n  json: {\n    ...classData,\n    context: context\n  }\n}];"
+      },
+      "id": "4153f1dc-0797-43c2-bff1-f6ee48d38756",
+      "name": "Prepare RAG Context1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2256,
+        2288
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5.4-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are BookLeaf Publishing's friendly author support assistant.\n\nThe author's question could not be answered from their account data directly. Use the following knowledge base context to answer their question:\n\nContext:\n{{ $('Prepare RAG Context1').first().json.context }}\n\nRules:\n- Be warm, professional, and concise\n- Only answer based on the context provided\n- If the context doesn't contain a clear answer, say: \"I don't have specific information about that. Let me connect you with our author support team who can help further.\"\n- Keep response under 80 words",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('Parse Classification1').first().json.query }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 250
+        }
+      },
+      "id": "c44fba8f-aec2-4b2f-a1e4-b7b911d84873",
+      "name": "OpenAI - RAG Response1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        -2048,
+        2288
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "r6DgVlzLKWp2CCM2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const ragResponse = $input.first().json;\nconst classData = $('Parse Classification1').first().json;\n\nreturn [{\n  json: {\n    response: ragResponse.message?.content || ragResponse.text || 'I don\\'t have specific information about that. Let me connect you with our support team at support@bookleafpub.com.',\n    confidence: classData.confidence,\n    intent: classData.intent,\n    escalated: false,\n    query: classData.query,\n    email: classData.email,\n    channel: classData.channel,\n    error_type: ''\n  }\n}];"
+      },
+      "id": "e80610d4-831d-41d7-a3af-6b99c72755ea",
+      "name": "Format RAG Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1728,
+        2288
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "bede02c3-1833-4a62-a933-b350983957c3",
+      "name": "Merge All Responses1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -656,
+        2256
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "query_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "query_text",
+              "fieldValue": "={{ $json.query }}"
+            },
+            {
+              "fieldId": "intent_classified",
+              "fieldValue": "={{ $json.intent }}"
+            },
+            {
+              "fieldId": "author_email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "response_text",
+              "fieldValue": "={{ $json.response }}"
+            },
+            {
+              "fieldId": "confidence_score",
+              "fieldValue": "={{ $json.confidence }}"
+            },
+            {
+              "fieldId": "escalated",
+              "fieldValue": "={{ $json.escalated }}"
+            },
+            {
+              "fieldId": "source_channel",
+              "fieldValue": "={{ $json.channel }}"
+            },
+            {
+              "fieldId": "error_type",
+              "fieldValue": "={{ $json.error_type || '' }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        2256
+      ],
+      "id": "5312a235-2044-4cf1-9248-e4fc01e54048",
+      "name": "Create a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "cny8vgadQfLa5kx1",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"response\": {{ JSON.stringify($('Merge All Responses1').first().json.response) }},\n  \"confidence\": {{ $('Merge All Responses1').first().json.confidence }},\n  \"intent\": {{ JSON.stringify($('Merge All Responses1').first().json.intent) }},\n  \"escalated\": {{ $('Merge All Responses1').first().json.escalated }},\n  \"needs_email\": {{ $('Merge All Responses1').first().json.needs_email || false }}\n}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7b1190ec-e49e-45aa-aa95-6393fd2f927c",
+      "name": "Send Response to Chat1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        2256
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b51ca76c-7f59-4a99-aca0-e8c316e16ce8",
+              "name": "response",
+              "value": "Of course! I'm here to help. 😊 Go ahead and ask your question — whether it's about publishing timelines, royalties, dashboard access, add-ons, or anything else!",
+              "type": "string"
+            },
+            {
+              "id": "1a2129ad-e4b3-4df1-be9f-59dea0a4bcd8",
+              "name": "confidence",
+              "value": "95",
+              "type": "string"
+            },
+            {
+              "id": "9b846be2-5639-4542-b7b1-b793a1ed8cef",
+              "name": "intent",
+              "value": "greeting",
+              "type": "string"
+            },
+            {
+              "id": "82c1be8e-0dc5-47b4-93c3-001b3f5658e1",
+              "name": "escalated",
+              "value": "false",
+              "type": "string"
+            },
+            {
+              "id": "6d6231db-4762-422c-95f4-e30556dd39ed",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            },
+            {
+              "id": "2ab10cb1-1c3e-4aff-aa7e-0438a16b507b",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "9d6d8e52-bb8a-4008-a776-1aba086a5ce0",
+              "name": "channel",
+              "value": "={{ $json.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "fcdd13fe-8714-421f-93b4-e0952e83149d",
+              "name": "error_type",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2528,
+        2960
+      ],
+      "id": "ccf5631b-c881-451f-b211-a611d34efbdb",
+      "name": "Greeting Response"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Route Query": {
+      "main": [
+        [
+          {
+            "node": "Get many rows1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask for Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Escalation Response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Greeting Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Match Handler": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Multiple Match Handler": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask for Email": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Receive Query1": {
+      "main": [
+        [
+          {
+            "node": "Set Input Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Input Fields1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Classify Intent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Classify Intent1": {
+      "main": [
+        [
+          {
+            "node": "Parse Classification1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Classification1": {
+      "main": [
+        [
+          {
+            "node": "Route Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows1": {
+      "main": [
+        [
+          {
+            "node": "Check Match Results1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DB Error Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Match Results1": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "No Match Handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI - Generate Response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Multiple Match Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generate Response1": {
+      "main": [
+        [
+          {
+            "node": "Format Success Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Success Response1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalation Response1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB Error Response1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "main": [
+        [
+          {
+            "node": "Prepare RAG Context1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare RAG Context1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - RAG Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - RAG Response1": {
+      "main": [
+        [
+          {
+            "node": "Format RAG Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format RAG Response1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Responses1": {
+      "main": [
+        [
+          {
+            "node": "Create a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row1": {
+      "main": [
+        [
+          {
+            "node": "Send Response to Chat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Greeting Response": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6b684eab-fb59-4f9b-ae52-a2478bff2ca5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f403bee16e7d46825bf939a4e37c3379537b5538d955550f920b50c4a1a8813f"
+  },
+  "id": "PIXVYgq1oqwPPaKN",
+  "tags": []
+}
