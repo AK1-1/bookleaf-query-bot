@@ -1,9 +1,10 @@
 # Live Links & Loom Video
 
-🌐 **Chat UI:** (https://preview--bookleaf-companion.lovable.app/)
-📊 **Identity Flowchart:** (https://www.figma.com/board/KVjupvdLLVEoZR0lFeO9xP/BookLeaf-Identity-Unification-Logic?node-id=0-1&t=nwAzGEERZTu7opm8-1)
+🌐 **Chat UI:** https://preview--bookleaf-companion.lovable.app/
 
-🎥 **Video Link:** (https://www.tella.tv/video/ai-automation-system-demo-n8n-supabase-openai-267i)
+📊 **Identity Flowchart:** https://www.figma.com/board/KVjupvdLLVEoZR0lFeO9xP/BookLeaf-Identity-Unification-Logic?node-id=0-1&t=nwAzGEERZTu7opm8-1
+
+🎥 **Video Link:** https://www.tella.tv/video/ai-automation-system-demo-n8n-supabase-openai-267i
 
 ## Video Contents
 
