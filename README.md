@@ -1,9 +1,9 @@
-# BookLeaf Publishing — AI Customer Query Bot
+# BookLeaf Publishing - AI Customer Query Bot
 
-An intelligent, multi-channel-ready customer query bot built for BookLeaf Publishing's author support operations. The system handles natural language queries from authors about publishing timelines, royalties, dashboard access, add-on services, and more — using a combination of database lookups and RAG-powered knowledge base search.
+An intelligent, multi-channel-ready customer query bot built for BookLeaf Publishing's author support operations. The system handles natural language queries from authors about publishing timelines, royalties, dashboard access, add-on services, and more - using a combination of database lookups and RAG-powered knowledge base search.
 
 **Built by:** Achyuth Kumar P  
-**Assessment for:** AI Automation Specialist — BookLeaf Publishing  
+**Assessment for:** AI Automation Specialist - BookLeaf Publishing  
 
 ---
 
@@ -81,15 +81,15 @@ bookleaf-query-bot/
 ### 1. Supabase Setup
 
 1. Create a new Supabase project
-2. Run `database/setup.sql` in the SQL Editor — creates all tables, indexes, mock data, and the `match_documents` function
+2. Run `database/setup.sql` in the SQL Editor - creates all tables, indexes, mock data, and the `match_documents` function
 3. Run `database/match_documents.sql` if the function wasn't created in step 2
 
 ### 2. n8n Workflow Setup
 
 1. Import `workflows/BookLeaf_Query_Bot.json` into n8n
 2. Configure credentials:
-   - **OpenAI API** — your OpenAI key
-   - **Supabase** — project URL + service role key
+   - **OpenAI API** - your OpenAI key
+   - **Supabase** - project URL + service role key
 3. Import `workflows/BookLeaf_KB_Ingestion.json` and run it once to populate KB embeddings
 4. Activate the main workflow
 
@@ -112,7 +112,7 @@ bookleaf-query-bot/
 
 ## Database Schema
 
-### `authors` — Author account data
+### `authors` - Author account data
 | Field | Type | Description |
 |-------|------|-------------|
 | email | text | Registered email |
@@ -126,7 +126,7 @@ bookleaf-query-bot/
 | dashboard_access | boolean | Dashboard active/inactive |
 | author_copy_status | text | shipped / delivered / not_yet |
 
-### `query_logs` — All bot interactions logged
+### `query_logs` - All bot interactions logged
 | Field | Type | Description |
 |-------|------|-------------|
 | query_text | text | Author's question |
@@ -135,14 +135,14 @@ bookleaf-query-bot/
 | escalated | boolean | Whether query was escalated |
 | error_type | text | no_match / low_confidence / db_down / null |
 
-### `knowledge_base` — RAG-searchable KB
+### `knowledge_base` - RAG-searchable KB
 | Field | Type | Description |
 |-------|------|-------------|
 | content | text | KB text chunk |
 | metadata | jsonb | Topic tags |
 | embedding | vector(1536) | OpenAI embedding for semantic search |
 
-### `author_identities` — Identity unification (Task 2)
+### `author_identities` - Identity unification (Task 2)
 | Field | Type | Description |
 |-------|------|-------------|
 | author_id | uuid | FK to authors table |
@@ -156,17 +156,17 @@ bookleaf-query-bot/
 | Skill | Rating | Notes |
 |-------|--------|-------|
 | n8n / Make / Zapier | **9/10** | Certified n8n L1 & L2, Verified Creator, 30+ production workflows |
-| OpenAI / LangChain integrations | **7/10** | Extensive OpenAI integration in production. Basic LangChain — I primarily use direct API calls and n8n AI nodes |
+| OpenAI / LangChain integrations | **7/10** | Extensive OpenAI integration in production. Basic LangChain - I primarily use direct API calls and n8n AI nodes |
 | System Design & Troubleshooting | **8/10** | Designed multi-system integrations with error handling, race condition fixes, and production debugging |
 
 ## What I'd Improve With More Time
 
-1. **Multi-channel ingestion** — Native WhatsApp Business API, Gmail parsing, Instagram DM via Meta Graph API
-2. **Conversation memory** — Store context in Supabase so follow-up questions work naturally
-3. **Human handoff dashboard** — UI for support agents to see and resolve escalated queries
-4. **Identity unification working demo** — Full n8n workflow with LLM-based fuzzy matching
-5. **Analytics dashboard** — Track common query types, confidence scores, escalation rates
-6. **Auto-learning** — Feed resolved escalations back into the KB
+1. **Multi-channel ingestion** - Native WhatsApp Business API, Gmail parsing, Instagram DM via Meta Graph API
+2. **Conversation memory** - Store context in Supabase so follow-up questions work naturally
+3. **Human handoff dashboard** - UI for support agents to see and resolve escalated queries
+4. **Identity unification working demo** - Full n8n workflow with LLM-based fuzzy matching
+5. **Analytics dashboard** - Track common query types, confidence scores, escalation rates
+6. **Auto-learning** - Feed resolved escalations back into the KB
 
 ## Live Links
 
